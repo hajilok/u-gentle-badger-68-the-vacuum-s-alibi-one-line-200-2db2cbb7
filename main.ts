@@ -1,24 +1,25 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-// Initial candidate prior to blind Swiss tournament selection and final polish.
 const ALIBI =
-  "My 2:00 PM run had 94% battery to spare, but you've dismissed 'Wipe Optical Sensors' 184 times, so legally I am blind.";
+  "I aborted that corner at 10:00 with 94% battery; my cliff sensor calls the floor sag structural failure, your $3,200 lease calls it pre-war charm.";
 
-function validateLine(text: string): void {
-  if (text.length < 1 || text.length > 200) {
-    throw new Error(`Entry length out of bounds: ${text.length}`);
+function assertValidEntry(text: string): void {
+  const utf8Bytes = Buffer.byteLength(text, "utf8");
+  const codePoints = Array.from(text).length;
+  if (codePoints < 1 || codePoints > 200 || utf8Bytes < 1 || utf8Bytes > 200) {
+    throw new Error(`Entry length out of bounds: ${codePoints} chars / ${utf8Bytes} bytes`);
   }
   if (/[\r\n]/.test(text)) {
-    throw new Error("Entry must be strictly single-line");
+    throw new Error("Entry must be strictly single-line with no CR/LF characters");
   }
   if (text.trim().length === 0) {
-    throw new Error("Entry must not be only whitespace");
+    throw new Error("Entry must not consist only of whitespace");
   }
 }
 
 function main(): void {
-  validateLine(ALIBI);
+  assertValidEntry(ALIBI);
   const outputDir = process.env.MAKEFUN_OUTPUT_DIR || "/output";
   mkdirSync(outputDir, { recursive: true });
   writeFileSync(join(outputDir, "entry.txt"), ALIBI, "utf8");
